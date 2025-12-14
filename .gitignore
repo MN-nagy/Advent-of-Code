@@ -1,0 +1,10 @@
+# --- Aot/.gitignore ---
+
+node_modules/
+
+compiled/
+
+input.txt
+
+.DS_Store
+Thumbs.db
