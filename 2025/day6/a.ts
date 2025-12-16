@@ -11,24 +11,49 @@ const TEST_INPUT = "./testinput.txt";
 
 const content = fs.readFileSync(INPUT, "utf-8").trim();
 
-let [r, i] = content.split("\n\n");
-const ranges = r.split("\n");
-const ingredients = i.split("\n");
+let problems = content.split("\n");
+let total = 0n;
+let problemAssimbler: string[] = [];
 
-let freshIngredientCount = 0;
+for (let col = 0; col < problems[0].length; col++) {
+  let end = problems.length;
+  let AccumulatedNum = "";
+  let char = "";
 
-for (const ingredient of ingredients) {
-  for (const range of ranges) {
-    const [start, end] = range.split("-");
-
-    if (
-      Number(start) <= Number(ingredient) &&
-      Number(ingredient) <= Number(end)
-    ) {
-      freshIngredientCount += 1;
-      break;
+  // to check colomns
+  for (let row = 0; row < end; row++) {
+    char = problems[row][col];
+    if (char === undefined) {
+      char = " ";
     }
+    AccumulatedNum += char;
+    if (!problemAssimbler[row]) {
+      problemAssimbler[row] = "";
+    }
+
+    problemAssimbler[row] += char;
+  }
+
+  if (AccumulatedNum.trim() === "" || col + 1 === problems[0].length) {
+    total += BigInt(
+      solveProblem(
+        String(problemAssimbler.pop()).trim(),
+        problemAssimbler.filter((str) => str.trim() !== "").map(Number),
+      ),
+    );
+    problemAssimbler = [];
   }
 }
 
-console.log(freshIngredientCount);
+function solveProblem(operator: string, number: number[]): number {
+  switch (operator) {
+    case "*":
+      return number.reduce((a, b) => a * b);
+    case "+":
+      return number.reduce((a, b) => a + b);
+    default:
+      return 0;
+  }
+}
+
+console.log(total);

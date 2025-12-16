@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import { quickSort } from "./qicksort";
 
 /*
 
@@ -12,38 +11,55 @@ const TEST_INPUT = "./testinput.txt";
 
 const content = fs.readFileSync(INPUT, "utf-8").trim();
 
-let [r, i] = content.split("\n\n");
-let ranges = r.split("\n").map((range) => {
-  let [s, e] = range.split("-");
-  return [Number(s), Number(e)];
-});
+let problems = content.split("\n");
+let total = 0n;
+let problemAssimbler: string[] = [];
+let operator = "";
 
-let freshIngredientCount = 0n;
+for (let col = 0; col < problems[0].length; col++) {
+  let end = problems.length;
+  let AccumulatedNum = "";
+  let char = "";
 
-/*
-Could have also used "ranges.sort((a, b) => a[0] - b[0])",
-but where's the fun in that!
-*/
-quickSort(ranges, 0, ranges.length - 1);
+  // to check colomns
+  for (let row = 0; row < end; row++) {
+    char = problems[row][col];
+    if (char === undefined) {
+      char = " ";
+    }
+    AccumulatedNum += char;
+    if (!problemAssimbler[col]) {
+      problemAssimbler[col] = "";
+    }
 
-let mergedRanges: number[][] = [];
-let rangeStart = ranges[0][0];
-let rangeEnd = ranges[0][1];
+    if (char === "*" || char === "+") {
+      operator = char;
+      char = " ";
+    }
+    problemAssimbler[col] += char;
+  }
 
-for (let i = 0; i < ranges.length; i++) {
-  if (ranges[i][0] <= rangeEnd) {
-    rangeEnd = Math.max(rangeEnd, ranges[i][1]);
-  } else {
-    mergedRanges.push([rangeStart, rangeEnd]);
-    rangeStart = ranges[i][0];
-    rangeEnd = ranges[i][1];
+  if (AccumulatedNum.trim() === "" || col + 1 === problems[0].length) {
+    total += BigInt(
+      solveProblem(
+        operator,
+        problemAssimbler.filter((str) => str.trim() !== "").map(Number),
+      ),
+    );
+    problemAssimbler = [];
+    operator = "";
   }
 }
 
-mergedRanges.push([rangeStart, rangeEnd]);
-
-for (const range of mergedRanges) {
-  freshIngredientCount += BigInt(range[1] - range[0] + 1);
+function solveProblem(operator: string, number: number[]): number {
+  switch (operator) {
+    case "*":
+      return number.reduce((a, b) => a * b);
+    case "+":
+      return number.reduce((a, b) => a + b);
+    default:
+      return 0;
+  }
 }
 
-console.log(freshIngredientCount);
+console.log(total);
